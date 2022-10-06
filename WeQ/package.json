@@ -1,5 +1,5 @@
 {
-  "name": "demo",
+  "name": "weq",
   "private": true,
   "version": "0.0.0",
   "main": "dist/main/main.js",
@@ -28,5 +28,19 @@
     "typescript": "^4.6.4",
     "vite": "^3.1.0",
     "vue-tsc": "^0.40.4"
+  },
+  "build": {
+    "appId": "com.antelcat.weq",
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./public/favicon.ico"
+    },
+    "files": [
+      "dist"
+    ],
+    "directories": {
+      "output": "build"
+    }
   }
 }
