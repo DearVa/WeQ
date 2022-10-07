@@ -1,16 +1,44 @@
 # WeQ 前端项目
 
 确保已经安装了 `pnpm`  
-`$ npm/cnpm install -g pnpm`  
+>`$ npm/cnpm install -g pnpm`  
+
 # 关于包
-`$ pnpm install`   
+>`$ pnpm install`   
+
+#### 清理
+>`$ pnpm store prune`
 
 # 关于调试
-`$ pnpm electron:dev`
+>`$ pnpm electron:dev`
 
 # 关于构建
-`$ pnpm app:build`   
-构建完成的文件将出现在 `build/` 下
+>```$ pnpm app:build```   
+构建完成的文件将出现在 `build` 目录下   
+---
+# 关于编辑器插件
+### Visual Studio Code
+- [Vue Language Features (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
+
+- [language-postcss](https://marketplace.visualstudio.com/items?itemName=cpylua.language-postcss)
+
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+
+- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) 
+
+### 插件带来的问题
+- **`" Module '*.vue' has no default export "`**   
+在 *`Vetur`* 插件的 *`settings.json`* 中添加：   
+```"vetur.validation.script": false```
+
+- **`" Parsing error: '>' expected "`**   
+在 *`.eslintrc.js`* 中添加:   
+```"parser": "vue-eslint-parser"```        
+其 *`"parserOptions"`* 节点中添加:    
+```"parser": "@typescript-eslint/parser"```
+
+--- 
+
 # Vue 3 + TypeScript + Vite
 
 This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
