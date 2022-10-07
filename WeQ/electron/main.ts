@@ -10,6 +10,7 @@ function createWindow() {
     height: 600,
     title : "WeQ",
     frame : false,
+    resizable : false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"), 
       nodeIntegration: true,
