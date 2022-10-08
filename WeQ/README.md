@@ -2,6 +2,8 @@
 
 确保已经安装了 `pnpm`  
 >`$ npm/cnpm install -g pnpm`  
+若终端中出现  `无法加载文件 ... 因为在此系统上禁止运行脚本`   
+请在`PowerShell`中键入 ` set-ExecutionPolicy RemoteSigned` 并允许
 
 # 关于包
 >`$ pnpm install`   
