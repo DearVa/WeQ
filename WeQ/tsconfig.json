@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+     // 定义this
+     "noImplicitThis": false,
+    // 无需要设定默认值
+    "strictPropertyInitialization": false,
+    // 不是函数的所有返回路径都有返回值时报错。
+    "noImplicitReturns": true,
+    // 移除注释
+    "removeComments": true,
+    "pretty": true,
+    "noEmitOnError": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+  },
+  "include": [
+    "src/**/*.ts", 
+    "src/**/*.d.ts", 
+    "src/**/*.tsx", 
+    "src/**/*.vue"
+  ],
+  "compileOnSave": true,
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "paths": {
+    "@/*": [
+      "src/*"
+    ]
+  } 
+}
