@@ -52,8 +52,7 @@ function createWindow() {
 }
 
 function createMirai() {
-    const cmdStr = "java -jar " + path.join(miraiDir, "mcl.jar");
-    miraiProcess = exec("start /min cmd.exe /K " + cmdStr);
+    miraiProcess = exec("java -jar " + path.join(miraiDir, "mcl.jar"));
     if (!miraiProcess.stdout || !miraiProcess.stderr) {
         throw new Error("~~~无法打开mirai的标准输出流");
     }
