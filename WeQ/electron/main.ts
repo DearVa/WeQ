@@ -1,4 +1,4 @@
-import { ChildProcess, exec } from "child_process";
+import { ChildProcess, exec, spawn } from "child_process";
 import { app, BrowserWindow, screen, webFrame, ipcMain } from "electron";
 import * as path from "path";
 
@@ -52,7 +52,10 @@ function createWindow() {
 }
 
 function createMirai() {
-    miraiProcess = exec("java -jar " + path.join(miraiDir, "mcl.jar"));
+    miraiProcess = spawn("java -jar " + path.join(miraiDir, "mcl.jar"), {
+        shell: true,
+        cwd: miraiDir
+    });
     if (!miraiProcess.stdout || !miraiProcess.stderr) {
         throw new Error("~~~无法打开mirai的标准输出流");
     }
