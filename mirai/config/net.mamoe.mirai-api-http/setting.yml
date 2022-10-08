@@ -1,5 +1,4 @@
-adapters: 
-  - http
+adapters:
   - ws
 debug: true
 enableVerify: false
@@ -8,13 +7,7 @@ singleMode: false
 cacheSize: 40960
 persistenceFactory: 'built-in'
 adapterSettings:
-  http:
-    host: localhost
-    port: 8080
-    cors: ["*"]
-    unreadQueueMaxSize: 1000
-
   ws:
     host: localhost
-    port: 8080
+    port: 13288
     reversedSyncId: -1
