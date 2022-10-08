@@ -8,6 +8,7 @@ const loadUrl =
         ? "http://127.0.0.1:5173/"
         : path.join(__dirname, "../src/index.html");
 let win: BrowserWindow | null = null;
+
 const mode = "development";
 
 let miraiProcess: ChildProcess;
@@ -46,7 +47,7 @@ function createWindow() {
         win = null;
     });
 
-    if (mode === "development") {
+    if (mode == "development") {
         win.webContents.openDevTools();
     }
 }
@@ -92,14 +93,16 @@ app.on("ready", function () {
 
 // 退出前关闭Mirai进程
 app.on("will-quit", () => {
-    console.log("will kill mirai");
+    console.log("~~~WILL KILL MIRAI WITH PROCESS ID : " + miraiProcess.pid);
     exec('taskkill /pid ' + miraiProcess.pid + ' /T /F');
+    miraiProcess?.emit("close")
 });
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
+    app.quit();
+    // if (process.platform !== "darwin") {
+    //     app.quit();
+    // }
 });
 
 // 实现自定义标题栏，最小化，最大化，关闭
