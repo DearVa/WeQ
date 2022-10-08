@@ -36,19 +36,19 @@ function createWindow() {
     const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
 
     win.loadURL(loadUrl);
+    win.on("closed", () => {
+        win = null;
+    });
+    
+    if (mode === "development") {
+        win.webContents.openDevTools();
+    }
+
     const zoomFactor =
         (window.innerHeight / devInnerHeight) *
         (window.devicePixelRatio / devDevicePixelRatio) *
         (devScaleFactor / scaleFactor);
     webFrame.setZoomFactor(zoomFactor);
-
-    win.on("closed", () => {
-        win = null;
-    });
-
-    if (mode === "development") {
-        win.webContents.openDevTools();
-    }
 }
 
 function createMirai() {

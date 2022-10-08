@@ -2,26 +2,26 @@
     <div class="common-layout">
         <el-container id="Container" style="">
 
+            <el-header id="Header">
 
-            <el-header id="Header" >
-                
             </el-header>
 
-
             <el-container id="Middle">
-
-
                 <el-aside id="Aside">
-                    <el-scrollbar >
-                        <p v-for="item in 20" :key="item" class="scrollbar-demo-item">
-                            <el-avatar style="margin-left: 20px; margin-right: 0px;" :size="40" shape="square" :src="`https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png`"/>
+                    <el-scrollbar>
+                        <p v-for="item in items" :key="item.name" class="scrollbar-demo-item">
+                            <el-avatar style="margin-left: 20px; margin-right: 0px;" :size="40" shape="square"
+                                :src="`https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png`" />
                             <el-card class="box-card">
                                 <div style="text-align: left ;max-width: 120px; ">
-                                    <tr><td class="color-dark-light">群聊{{item}}</td></tr>
+                                    <tr>
+                                        <td class="color-dark-light">{{item.name}}</td>
+                                    </tr>
                                     <tr style="">
-                                        <td style="overflow: hidden;max-width: 120px; 
-                                        text-overflow:ellipsis;white-space: nowrap; color:#a2a2a2" 
-                                        :style="`font-size:small`" class="color-dark-light">这是最新的群信息!!!!!!</td>
+                                        <td style="overflow: hidden; max-width: 120px; 
+                                            text-overflow: ellipsis; white-space: nowrap; color:#a2a2a2
+                                            font-size: small" 
+                                            class="color-dark-light">{{item.preview}}</td>
                                     </tr>
                                 </div>
                             </el-card>
@@ -31,7 +31,9 @@
 
 
                 <el-main id="Main">
-                    
+                    <el-page-header :content="items[selectedIndex].name">
+
+                    </el-page-header>
                 </el-main>
 
 
@@ -41,18 +43,37 @@
 </template>
 
 <script setup lang="ts">
+//import { MiraiHelper } from '../framework/mirai_helper';
+//MiraiHelper.initialize();
+</script>
 
+<script lang="ts">
+export default {
+    data() {
+        const items = [];
+        for (let i = 0; i < 20; i++) {
+            items.push({
+                name: "群聊" + i,
+                preview: "这是最新的群信息！这是最新的群信息！这是最新的群信息！"
+            });
+        }
+        return {
+            items,
+            selectedIndex: 0,
+        }
+    }
+}
 </script>
 
 <style scoped>
 #Container {
-    width:900px;
-    height:570px;
+    width: 900px;
+    height: 570px;
 }
 
 #Header {
     background-color: #f5f5f5;
-    border-bottom-width: 1px!important;
+    border-bottom-width: 1px !important;
     border-top: 0;
     border-left: 0;
     border-right: 0;
@@ -62,22 +83,21 @@
 }
 
 #Aside {
-    width:250px;
+    width: 250px;
     height: inherit;
     background: #e2e2e2;
 }
 
-#CloseButton{
+#CloseButton {
     align-self: flex-end;
     right: 0;
 }
 
-#Middle{
+#Middle {
     height: 510px;
 }
 
-#Main {
-}
+#Main {}
 
 .scrollbar-demo-item {
     display: flex;
@@ -87,15 +107,15 @@
     margin: 0;
     border-radius: 0;
 }
-.scrollbar-demo-item:hover{
+
+.scrollbar-demo-item:hover {
     background-color: #d6d6d6;
     transition-duration: 0.3s;
 }
 
-.el-card{
-    border:none !important;
+.el-card {
+    border: none !important;
     background-color: transparent;
-    box-shadow: none!important;
+    box-shadow: none !important;
 }
-
 </style>
