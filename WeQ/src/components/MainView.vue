@@ -71,9 +71,11 @@
     align-self: flex-end;
     right: 0;
 }
+
 #Middle{
     height: 510px;
 }
+
 #Main {
 }
 
