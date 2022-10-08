@@ -13,6 +13,7 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "dependencies": {
+    "mirai-ts": "^2.4.1",
     "wechaty": "^1.20.2"
   },
   "devDependencies": {
