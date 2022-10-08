@@ -1,5 +1,4 @@
 import { MsgBase, QQMsg } from "./msg";
-import { MiraiHelper as mh } from './mirai_helper';
 
 /**
  * 发送消息的目标，也就是好友或者群

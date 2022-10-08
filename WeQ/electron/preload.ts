@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { MiraiHelper } from "../framework/mirai_helper";
+import { MiraiHelp } from "../framework/mirai_helper";
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -17,5 +17,5 @@ window.addEventListener("DOMContentLoaded", () => {
         replaceText(`${type}-version`, process.versions[type]);
     }
 
-    //MiraiHelper.initialize();
+    MiraiHelp().initialize();
 });

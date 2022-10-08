@@ -1,5 +1,4 @@
 import { Mirai, MessageType } from 'mirai-ts';
-import { MiraiHelper as mh } from './mirai_helper';
 
 export abstract class MsgBase {
     /**
@@ -35,16 +34,23 @@ export class QQMsg extends MsgBase {
     }
 
     undo() {
-        
+        throw "No Implement Exception"
     }
 }
 
 export class WeChatMsg extends MsgBase {
-    async reply(msg: MsgBase) {
+    private weChagMsg : MessageType.ChatMessage;
 
+    constructor(msg: MessageType.ChatMessage){
+        super(msg.messageChain)
+        this.weChagMsg = msg;
+    }
+
+    async reply(msg: MsgBase) {
+        this.weChagMsg.reply(msg.msg)
     }
 
     undo() {
-
+        throw "No Implement Exception"
     }
 }
