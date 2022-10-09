@@ -1,8 +1,11 @@
-import { ChildProcess, exec, spawn } from "child_process";
+import { ChildProcess, spawn } from "child_process";
 import { app, BrowserWindow, screen, webFrame, ipcMain } from "electron";
+import { isUndefined } from "element-plus/es/utils";
 import * as path from "path";
+import * as Logger from "../framework/logger";
+import { Server } from "../framework/server";
 
-console.log(process.env.MODE);
+Logger.log(process.env.MODE);
 const loadUrl =
     process.env.MODE === "devlopment"
         ? "http://127.0.0.1:5173/"
@@ -12,16 +15,14 @@ let win: BrowserWindow | null = null;
 const mode = "development";
 
 let miraiProcess: ChildProcess;
-let miraiProcessId: null | number = null;
-let miraiExit: Promise<number | null>;
 
 const usePackadJRE = false;
 
-console.log("~~~THE ELECTRON PATH IS : " + app.getAppPath() + " ~~~");
-console.log("~~~THE ELECTRON EXE IS : " + app.getPath("exe") + " ~~~");
+Logger.log("~~~THE ELECTRON PATH IS : " + app.getAppPath() + " ~~~");
+Logger.log("~~~THE ELECTRON EXE IS : " + app.getPath("exe") + " ~~~");
 const miraiDir = path.join(path.dirname(app.getAppPath()), "mirai");
 const mirai = path.join(miraiDir, "mcl.cmd");
-console.log("~~~THE MCL PATH IS : " + mirai + " ~~~");
+Logger.log("~~~THE MCL PATH IS : " + mirai + " ~~~");
 
 function createWindow() {
     win = new BrowserWindow({
@@ -40,29 +41,32 @@ function createWindow() {
     const devScaleFactor = 1.3; // 开发时的ScaleFactor
     const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
 
-    win.loadURL(loadUrl);
-    const zoomFactor =
-        (window.innerHeight / devInnerHeight) *
-        (window.devicePixelRatio / devDevicePixelRatio) *
-        (devScaleFactor / scaleFactor);
-    webFrame.setZoomFactor(zoomFactor);
-
     win.on("closed", () => {
         win = null;
     });
 
-    if (mode == "development") {
+    win.loadURL(loadUrl);
+
+    if (win && mode == "development") {
         win.webContents.openDevTools();
+    }
+
+    if (window) {
+        const zoomFactor =
+            (window.innerHeight / devInnerHeight) *
+            (window.devicePixelRatio / devDevicePixelRatio) *
+            (devScaleFactor / scaleFactor);
+        webFrame.setZoomFactor(zoomFactor);
     }
 }
 
 function createMirai() {
     let cmdHead = "java"
-    if(usePackadJRE){
+    if (usePackadJRE) {
         cmdHead = path.join(miraiDir, "jre", "bin", "java.exe");
     }
     miraiProcess = spawn(
-        cmdHead +" -jar " +  path.join(miraiDir, "mcl.jar"),
+        cmdHead + " -jar " + path.join(miraiDir, "mcl.jar"),
         {
             shell: true,
             cwd: miraiDir,
@@ -72,50 +76,20 @@ function createMirai() {
         throw new Error("~~~无法打开mirai的标准输出流");
     }
 
-    const head = "W/Processer: Mirai Process Id :";
     // 打印正常的后台可执行程序输出
-    miraiProcess.stdout.on("data", (data)=>{
-        const dataStr = data.toString();
-        if (dataStr.includes(head) && miraiProcessId == null) {
-            const res = dataStr.split("|");
-            miraiProcessId = parseInt(res[res.length - 1]);
-            console.log(
-                "~~~ 找到了，应该被kill的mirai进程ID为" +
-                    miraiProcessId +
-                    "~~~\n"
-            );
-        }
-        console.log("Mirai[Data]: " + data);
+    miraiProcess.stdout.on("data", (data) => {
+        Logger.log("Mirai[Data]: " + data);
     });
 
     // 打印错误的后台可执行程序输出
-    miraiProcess.stderr.on("data", (data)=> {
-        console.log("Mirai[Error]: " + data);
+    miraiProcess.stderr.on("data", (data) => {
+        Logger.log("Mirai[Error]: " + data);
     });
 
     // 退出之后的输出
-    miraiProcess.on("close", (code)=>{
-        console.log("Mirai[Exit]: " + code);
+    miraiProcess.on("close", (code) => {
+        Logger.log("Mirai[Exit]: " + code);
     });
-
-    miraiExit = new Promise((res, rej) => {
-        miraiProcess.on("close", (code)=>{
-            res(code);
-        });
-        app.on("quit", () => {
-            rej("~~~ MIRAI HASN`T BEEN CLOSE");
-        });
-    });
-}
-
-function killMirai() {
-    let killId = miraiProcess.pid;
-    if (miraiProcessId != null) {
-        killId = miraiProcessId;
-    }
-    console.log("~~~ WILL KILL MIRAI WITH PROCESS ID : " + killId + " ~~~");
-    const interval = setInterval(() => exec("taskkill /pid " + miraiProcessId?.toString().trim() + " /F"),10);
-    miraiExit.then((code) => { clearInterval(interval);console.log("~~~ MIRAI EXIT WITH CODE : " + code + " ~~~")} );
 }
 
 app.whenReady().then(() => {
@@ -128,22 +102,23 @@ app.whenReady().then(() => {
 });
 
 // 在Electron进程就绪的时候启动Mirai
-app.on("ready", () => {
+app.on("ready", async () => {
+    await Server.launch(13287);
     createMirai();
 });
-//窗体全部关闭事件
-app.on("window-all-closed", () => {
-    console.log("window all closed");
-    killMirai();
-    miraiExit.then(()=>{console.log("call app quit");app.quit(); })
-});
-// 退出前关闭Mirai进程
-app.on("will-quit", () => {
-    console.log("will quit");
 
+// 窗体全部关闭事件
+app.on("window-all-closed", () => {
+    Server.stop();
+    Logger.log("window all closed");
 });
-app.on("before-quit",()=>{
-    console.log("before quit")
+
+app.on("will-quit", () => {
+    Logger.log("will quit");
+});
+
+app.on("before-quit", () => {
+    Logger.log("before quit")
 })
 
 // 实现自定义标题栏，最小化，最大化，关闭
@@ -155,7 +130,7 @@ ipcMain.on("window-max", () => {
         win?.maximize();
     }
 });
+
 ipcMain.on("window-close", () => {
     win?.destroy();
 });
-
