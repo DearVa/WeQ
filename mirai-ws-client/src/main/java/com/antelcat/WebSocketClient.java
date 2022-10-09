@@ -29,17 +29,24 @@ public final class WebSocketClient extends JavaPlugin {
 
         Request request = new Request.Builder().get().url("ws://localhost:13287").build();
 
-        WebSocket ws = client.newWebSocket(request, new WebSocketListener() {
+        client.newWebSocket(request, new WebSocketListener() {
             @Override
             public void onOpen(@NotNull WebSocket ws, @NotNull Response response) {
                 super.onOpen(ws, response);
-                ws.send("{ \"type\": \"mirai\" }");
+                ws.send("{ \"type\": \"connect\", \"from\": \"mirai\" }");
             }
 
             @Override
             public void onMessage(@NotNull WebSocket ws, @NotNull String text) {
                 super.onMessage(ws, text);
                 //收到消息...（一般是这里处理json）
+            }
+
+            @Override
+            public void onClosing(@NotNull WebSocket ws, int code, @NotNull String reason) {
+                super.onClosing(ws, code, reason);
+                getLogger().info("WebSocket closing, exiting...");
+                System.exit(0);
             }
 
             @Override

@@ -5,7 +5,6 @@ export class Server {
     static wss: websocket.Server;
 
     static async launch(port: number) {
-        Logger.info('Server launching at port ' + port);
         if (this.wss) {
             return;
         }
@@ -31,7 +30,7 @@ export class Server {
                 Logger.log('客户发来ws消息 ', msg);
 
                 switch (msg.type) {
-                    case "connect":
+                    case 'connect':
                         switch (msg.from) {
                             case 'mirai':
                                 Logger.log('mirai已连接');
@@ -43,6 +42,8 @@ export class Server {
                                 return;
                         }
                         isHandshakeSucceed = true;
+                        break;
+                    case 'heartbeat':
                         break;
                     default:
                         Logger.warn("Unknown message " + msg);
@@ -70,6 +71,9 @@ export class Server {
     }
 
     static stop() {
-        this.wss.close();
+        this.wss.clients.forEach((socket) => {
+            socket.terminate();
+        });
+        Logger.info('Server closed');
     }
 }
