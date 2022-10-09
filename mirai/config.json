@@ -36,6 +36,12 @@
       "version": "2.6.2",
       "type": "plugins",
       "versionLocked": false
+    },
+    "org.bouncycastle:bcprov-jdk15on": {
+      "channel": "stable",
+      "version": "1.64",
+      "type": "libs",
+      "versionLocked": false
     }
   },
   "archiveSuffix": [

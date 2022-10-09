@@ -1,3 +1,5 @@
 bots/*
 logs/*
 config/Console/AutoLogin.yml
+
+jre/

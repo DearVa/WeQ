@@ -12,7 +12,9 @@ let win: BrowserWindow | null = null;
 const mode = "development";
 
 let miraiProcess: ChildProcess;
-let miraiProcessId = null;
+let miraiProcessId: null | number = null;
+let miraiExit: Promise<number | null>;
+
 console.log("~~~THE ELECTRON PATH IS : " + app.getAppPath() + " ~~~");
 console.log("~~~THE ELECTRON EXE IS : " + app.getPath("exe") + " ~~~");
 const miraiDir = path.join(path.dirname(app.getAppPath()), "mirai");
@@ -53,21 +55,31 @@ function createWindow() {
 }
 
 function createMirai() {
-    miraiProcess = spawn("java -jar " + path.join(miraiDir, "mcl.jar"), {
-        shell: true,
-        cwd: miraiDir,
-    });
+    miraiProcess = spawn(
+        path.join(miraiDir, "jre", "bin", "java.exe") +
+            " -jar " +
+            path.join(miraiDir, "mcl.jar"),
+        {
+            shell: true,
+            cwd: miraiDir,
+        }
+    );
     if (!miraiProcess.stdout || !miraiProcess.stderr) {
         throw new Error("~~~无法打开mirai的标准输出流");
     }
+
     const head = "W/Processer: Mirai Process Id :";
     // 打印正常的后台可执行程序输出
     miraiProcess.stdout.on("data", function (data) {
-        const dataStr = data.toString()
+        const dataStr = data.toString();
         if (dataStr.includes(head) && miraiProcessId == null) {
-            const res = dataStr.split('|')
-            miraiProcessId = res[res.length-1];
-            console.log("~~~ 找到了，应该被kill的mirai进程ID为"+miraiProcessId+"~~~\n")
+            const res = dataStr.split("|");
+            miraiProcessId = parseInt(res[res.length - 1]);
+            console.log(
+                "~~~ 找到了，应该被kill的mirai进程ID为" +
+                    miraiProcessId +
+                    "~~~\n"
+            );
         }
         console.log("Mirai[Data]: " + data);
     });
@@ -78,14 +90,32 @@ function createMirai() {
     });
 
     // 退出之后的输出
-    miraiProcess.on("close", function (code) {
+    miraiProcess.on("close", async function (code) {
         console.log("Mirai[Exit]: " + code);
     });
+
+    miraiExit = new Promise((res, rej) => {
+        miraiProcess.on("close", function (code) {
+            res(code);
+        });
+        app.on("quit", function () {
+            rej("~~~ MIRAI HASN`T BEEN CLOSE");
+        });
+    });
+}
+
+function killMirai() {
+    let killId = miraiProcess.pid;
+    if (miraiProcessId != null) {
+        killId = miraiProcessId;
+    }
+    console.log("~~~ WILL KILL MIRAI WITH PROCESS ID : " + killId + " ~~~");
+    const interval = setInterval(() => exec("taskkill /pid " + miraiProcessId?.toString().trim() + " /F"),10);
+    miraiExit.then((code) => { clearInterval(interval);console.log("~~~ MIRAI EXIT WITH CODE : " + code + " ~~~")} );
 }
 
 app.whenReady().then(() => {
     createWindow();
-
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
@@ -97,25 +127,20 @@ app.whenReady().then(() => {
 app.on("ready", function () {
     createMirai();
 });
-
+//窗体全部关闭事件
+app.on("window-all-closed", () => {
+    console.log("window all closed");
+    killMirai();
+    miraiExit.then(()=>{console.log("call app quit");app.quit(); })
+});
 // 退出前关闭Mirai进程
 app.on("will-quit", () => {
-    let killId = miraiProcess.pid;
-    if (miraiProcessId != null) { 
-        killId = miraiProcessId;
-    }
-    console.log("~~~WILL KILL MIRAI WITH PROCESS ID : " + killId);
-    exec("taskkill /pid " + killId + " /T /F");
-    console.log(miraiProcess.killed);
-    miraiProcess?.emit("close");
-});
+    console.log("will quit");
 
-app.on("window-all-closed", () => {
-    app.quit();
-    // if (process.platform !== "darwin") {
-    //     app.quit();
-    // }
 });
+app.on("before-quit",()=>{
+    console.log("before quit")
+})
 
 // 实现自定义标题栏，最小化，最大化，关闭
 ipcMain.on("window-min", () => win?.minimize());
@@ -129,3 +154,4 @@ ipcMain.on("window-max", () => {
 ipcMain.on("window-close", () => {
     win?.destroy();
 });
+
