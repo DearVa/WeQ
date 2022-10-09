@@ -15,6 +15,8 @@ let miraiProcess: ChildProcess;
 let miraiProcessId: null | number = null;
 let miraiExit: Promise<number | null>;
 
+const usePackadJRE = false;
+
 console.log("~~~THE ELECTRON PATH IS : " + app.getAppPath() + " ~~~");
 console.log("~~~THE ELECTRON EXE IS : " + app.getPath("exe") + " ~~~");
 const miraiDir = path.join(path.dirname(app.getAppPath()), "mirai");
@@ -55,10 +57,12 @@ function createWindow() {
 }
 
 function createMirai() {
+    let cmdHead = "java"
+    if(usePackadJRE){
+        cmdHead = path.join(miraiDir, "jre", "bin", "java.exe");
+    }
     miraiProcess = spawn(
-        path.join(miraiDir, "jre", "bin", "java.exe") +
-            " -jar " +
-            path.join(miraiDir, "mcl.jar"),
+        cmdHead +" -jar " +  path.join(miraiDir, "mcl.jar"),
         {
             shell: true,
             cwd: miraiDir,
@@ -70,7 +74,7 @@ function createMirai() {
 
     const head = "W/Processer: Mirai Process Id :";
     // 打印正常的后台可执行程序输出
-    miraiProcess.stdout.on("data", function (data) {
+    miraiProcess.stdout.on("data", (data)=>{
         const dataStr = data.toString();
         if (dataStr.includes(head) && miraiProcessId == null) {
             const res = dataStr.split("|");
@@ -85,20 +89,20 @@ function createMirai() {
     });
 
     // 打印错误的后台可执行程序输出
-    miraiProcess.stderr.on("data", function (data) {
+    miraiProcess.stderr.on("data", (data)=> {
         console.log("Mirai[Error]: " + data);
     });
 
     // 退出之后的输出
-    miraiProcess.on("close", async function (code) {
+    miraiProcess.on("close", (code)=>{
         console.log("Mirai[Exit]: " + code);
     });
 
     miraiExit = new Promise((res, rej) => {
-        miraiProcess.on("close", function (code) {
+        miraiProcess.on("close", (code)=>{
             res(code);
         });
-        app.on("quit", function () {
+        app.on("quit", () => {
             rej("~~~ MIRAI HASN`T BEEN CLOSE");
         });
     });
@@ -124,7 +128,7 @@ app.whenReady().then(() => {
 });
 
 // 在Electron进程就绪的时候启动Mirai
-app.on("ready", function () {
+app.on("ready", () => {
     createMirai();
 });
 //窗体全部关闭事件
