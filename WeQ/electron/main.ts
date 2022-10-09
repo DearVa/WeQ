@@ -12,7 +12,7 @@ let win: BrowserWindow | null = null;
 const mode = "development";
 
 let miraiProcess: ChildProcess;
-
+let miraiProcessId = null;
 console.log("~~~THE ELECTRON PATH IS : " + app.getAppPath() + " ~~~");
 console.log("~~~THE ELECTRON EXE IS : " + app.getPath("exe") + " ~~~");
 const miraiDir = path.join(path.dirname(app.getAppPath()), "mirai");
@@ -55,13 +55,20 @@ function createWindow() {
 function createMirai() {
     miraiProcess = spawn("java -jar " + path.join(miraiDir, "mcl.jar"), {
         shell: true,
-        cwd: miraiDir
+        cwd: miraiDir,
     });
     if (!miraiProcess.stdout || !miraiProcess.stderr) {
         throw new Error("~~~无法打开mirai的标准输出流");
     }
+    const head = "W/Processer: Mirai Process Id :";
     // 打印正常的后台可执行程序输出
     miraiProcess.stdout.on("data", function (data) {
+        const dataStr = data.toString()
+        if (dataStr.includes(head) && miraiProcessId == null) {
+            const res = dataStr.split('|')
+            miraiProcessId = res[res.length-1];
+            console.log("~~~ 找到了，应该被kill的mirai进程ID为"+miraiProcessId+"~~~\n")
+        }
         console.log("Mirai[Data]: " + data);
     });
 
@@ -93,9 +100,14 @@ app.on("ready", function () {
 
 // 退出前关闭Mirai进程
 app.on("will-quit", () => {
-    console.log("~~~WILL KILL MIRAI WITH PROCESS ID : " + miraiProcess.pid);
-    exec('taskkill /pid ' + miraiProcess.pid + ' /T /F');
-    miraiProcess?.emit("close")
+    let killId = miraiProcess.pid;
+    if (miraiProcessId != null) { 
+        killId = miraiProcessId;
+    }
+    console.log("~~~WILL KILL MIRAI WITH PROCESS ID : " + killId);
+    exec("taskkill /pid " + killId + " /T /F");
+    console.log(miraiProcess.killed);
+    miraiProcess?.emit("close");
 });
 
 app.on("window-all-closed", () => {
