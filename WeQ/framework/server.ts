@@ -3,7 +3,7 @@ import * as Logger from './logger';
 
 export class Server {
     static wss: websocket.Server;
-
+    
     static async launch(port: number) {
         if (this.wss) {
             return;

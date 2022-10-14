@@ -1,5 +1,5 @@
 import { ChildProcess, spawn } from "child_process";
-import { app, BrowserWindow, screen, webFrame, ipcMain } from "electron";
+import { app, BrowserWindow, screen, webFrame, ipcMain, } from "electron";
 import * as path from "path";
 import * as Logger from "../framework/logger";
 import { Server } from "../framework/server";
@@ -14,8 +14,10 @@ let win: BrowserWindow | null = null;
 const mode = "development";
 
 let miraiProcess: ChildProcess;
+let miraiFinish : Promise<void>;
 
-const usePackadJRE = false;
+
+const usePackadJRE = true;
 
 Logger.log("~~~THE ELECTRON PATH IS : " + app.getAppPath() + " ~~~");
 Logger.log("~~~THE ELECTRON EXE IS : " + app.getPath("exe") + " ~~~");
@@ -89,6 +91,26 @@ function createMirai() {
     miraiProcess.on("close", (code) => {
         Logger.log("Mirai[Exit]: " + code);
     });
+
+    miraiFinish = new Promise((res,rej)=>{
+        miraiProcess?.stdout?.on("data", (data) => {
+            const str = new String(data);
+            if(str.includes("mirai-console started successfully")){
+                res()
+            }
+        });
+        miraiProcess?.on("close",(code)=>{
+            rej("~~~ MIRAI HAS BEEN CLOSED: "+ code + " ~~~");
+        })
+    })
+    
+    ipcMain.on("mirai",(event,arg)=>{
+        console.log("~~~ MIRAI HAS BEEN SUBSCRIBED ~~~");
+        miraiFinish.then(()=>{
+            event.sender.send("mirai",{ msg : "started"})
+        })
+    })
+    
 }
 
 app.whenReady().then(() => {
@@ -110,6 +132,7 @@ app.on("ready", async () => {
 app.on("window-all-closed", () => {
     Server.stop();
     Logger.log("window all closed");
+    app.quit();
 });
 
 app.on("will-quit", () => {
